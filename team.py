@@ -25,23 +25,31 @@ def get_comp_id():
 
 
 def get_comp_teams(comp_ids):
-
     API_KEY = "0cd173cf1b864ce092037aec02a7fdcb"
-    # print(comp_ids)
+    comp_teams = {}  # Dictionary to store teams by competition ID
 
-    for id in comp_ids[:3]:
-        # print(id)
-        team_url = f"http://api.football-data.org/v4/competitions/{id}/teams"
-        headers = {"X-Auth-Token": API_KEY}  
+    for comp_id in comp_ids:  # Limit to the first 3 competition IDs for testing
+        team_url = f"http://api.football-data.org/v4/competitions/{comp_id}/teams"
+        headers = {"X-Auth-Token": API_KEY}
         resp = requests.get(team_url, headers=headers)
 
         if resp.status_code == 200:
-            data = resp.json()
+            data = resp.json()  # Parse JSON response
+            teams = data.get("teams", [])  # Get the list of teams
+            team_names = [team.get("name") for team in teams if team.get("name")]  # Extract team names
+            comp_teams[comp_id] = team_names  # Map the competition ID to its teams
+        else:
+            print(f"Failed to fetch teams for competition {comp_id}. Status code: {resp.status_code}")
+            comp_teams[comp_id] = []  # Assign an empty list for failed requests
+    
+    return comp_teams  # Return the nested dictionary
 
-        print(data[0])
+# Example usage
 
+comp_ids = get_comp_id()
+nested_dict = get_comp_teams(comp_ids)
 
-get_comp_id()
-get_comp_teams(get_comp_id())
-
+# Print the nested dictionary in a readable format
+import pprint
+pprint.pprint(nested_dict)
 
