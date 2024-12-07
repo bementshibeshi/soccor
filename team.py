@@ -73,7 +73,7 @@ def set_up_teams_table(data, cur, conn):
     
     conn.commit()
 
-    def create_teams_table(data, cur, conn):
+def create_teams_table(data, cur, conn):
     # Create the Teams table if it doesn't exist
     cur.execute("""
         CREATE TABLE IF NOT EXISTS Teams (
