@@ -75,29 +75,6 @@ def set_up_teams_table(data, cur, conn):
     
     conn.commit()
 
-def create_teams_table(data, cur, conn):
-    # Create the Teams table if it doesn't exist
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS Teams (
-            team_id INTEGER PRIMARY KEY,
-            name TEXT UNIQUE
-        )
-    """)
-
-    # Populate the Teams table with data
-    for team in data:
-        print(team)
-        team_id = team["id"]
-        team_name = team["name"]
-
-        if team_id is not None and team_name:
-            cur.execute("""
-                INSERT OR IGNORE INTO Teams (team_id, name)
-                VALUES (?, ?)
-            """, (team_id, team_name))
-
-    conn.commit()
-
 
 def main():
     comp_ids = get_comp_id()
