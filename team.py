@@ -46,28 +46,28 @@ def get_comp_teams(comp_ids):
     
     return comp_teams 
 
-# Example usage
-
 comp_ids = get_comp_id()
 nested_dict = get_comp_teams(comp_ids)
 
 pprint.pprint(nested_dict)
 
 def set_up_database(db_name):
-    """
-    Sets up a SQLite database connection and cursor.
-
-    Parameters
-    -----------------------
-    db_name: str
-        The name of the SQLite database.
-
-    Returns
-    -----------------------
-    Tuple (Cursor, Connection):
-        A tuple containing the database cursor and connection objects.
-    """
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
     cur = conn.cursor()
     return cur, conn
+
+def set_up_teams_table(data, cur, conn):
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, name TEXT UNIQUE)"
+    )
+    
+    for team in data:
+        team_id = team.get("id")
+        team_name = team.get("name")
+        if team_id and team_name:
+            cur.execute(
+                "INSERT OR IGNORE INTO Teams (id, name) VALUES (?, ?)", (team_id, team_name)
+            )
+    
+    conn.commit()
