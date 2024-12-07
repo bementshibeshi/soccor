@@ -49,10 +49,6 @@ def get_comp_teams(comp_ids):
         # print(nested_dict)
     return comp_teams
 
-get_comp_id()
-get_comp_teams(get_comp_id())
-
-
 def set_up_database(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
@@ -64,13 +60,15 @@ def set_up_teams_table(data, cur, conn):
         "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, name TEXT UNIQUE)"
     )
     
-    for team in data:
-        team_id = team.get("id")
-        team_name = team.get("name")
-        if team_id and team_name:
-            cur.execute(
-                "INSERT OR IGNORE INTO Teams (id, name) VALUES (?, ?)", (team_id, team_name)
-            )
+    # print(data)
+    for team in data.items():
+        # print(team)
+        for name in team[1]:
+            team_name = name
+            if team_name:
+                cur.execute(
+                    "INSERT OR IGNORE INTO Teams (id, name) VALUES (id, ?)", (team_name,)
+                )
     
     conn.commit()
 
@@ -85,8 +83,9 @@ def create_teams_table(data, cur, conn):
 
     # Populate the Teams table with data
     for team in data:
-        team_id = team.get("id")
-        team_name = team.get("name")
+        print(team)
+        team_id = team["id"]
+        team_name = team["name"]
 
         if team_id is not None and team_name:
             cur.execute("""
@@ -100,10 +99,10 @@ def create_teams_table(data, cur, conn):
 
 def main():
     comp_ids = get_comp_id()
-    print(comp_ids)
+    # print(comp_ids)
     data = get_comp_teams(comp_ids)
 
-    cur, conn = set_up_database("pokemon.db")
+    cur, conn = set_up_database("206_final.db")
     set_up_teams_table(data, cur, conn)
     create_teams_table(data, cur, conn)
     conn.close()
