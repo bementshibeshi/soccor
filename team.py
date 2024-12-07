@@ -72,3 +72,39 @@ def set_up_teams_table(data, cur, conn):
             )
     
     conn.commit()
+
+    def create_teams_table(data, cur, conn):
+    # Create the Teams table if it doesn't exist
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS Teams (
+            team_id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE
+        )
+    """)
+
+    # Populate the Teams table with data
+    for team in data:
+        team_id = team.get("id")
+        team_name = team.get("name")
+
+        if team_id is not None and team_name:
+            cur.execute("""
+                INSERT OR IGNORE INTO Teams (team_id, name)
+                VALUES (?, ?)
+            """, (team_id, team_name))
+
+    # Commit changes
+    conn.commit()
+
+
+def main():
+    #json_data = read_data_from_file("pokemon.json")
+    cur, conn = set_up_database("pokemon.db")
+    set_up_teams_table(json_data, cur, conn)
+    create_teams_table(json_data, cur, conn)
+    conn.close()
+    # FEEL FREE TO USE THIS SPACE TO TEST OUT YOUR FUNCTIONS
+
+
+if __name__ == "__main__":
+    main()
