@@ -63,11 +63,13 @@ def set_up_teams_table(data, cur, conn):
     # print(data)
     for team in data.items():
         # print(team)
+        count = 0
         for name in team[1]:
             team_name = name
             if team_name:
+                count += 1
                 cur.execute(
-                    "INSERT OR IGNORE INTO Teams (id, name) VALUES (id, ?)", (team_name,)
+                    "INSERT OR IGNORE INTO Teams (id, name) VALUES (?, ?)", (count, team_name)
                 )
     
     conn.commit()
