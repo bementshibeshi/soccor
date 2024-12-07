@@ -25,9 +25,15 @@ def get_comp_id():
     for head in data.items():
         # print(head)
         for info in head:
-            print(info)
-            for list in info.items():
-                print(list)
+            # print(       )
+            # print(info)
+            if type(info) == list:
+                for item in info:
+                    # print(item)
+                    for id in item:
+                        id_num = id.get("id")
+                        print(id_num)
+
 
 
 get_comp_id()
