@@ -20,6 +20,7 @@ def get_comp_id():
         
         comp_ids = [comp["id"] for comp in competitions if "id" in comp]
         
+        # print(comp_ids)
         return comp_ids
     else:
         print(f"Error: {resp.status_code} - {resp.reason}")
@@ -44,9 +45,9 @@ def get_comp_teams(comp_ids):
             print(f"Failed to fetch teams for competition {comp_id}. Status code: {resp.status_code}")
             continue
     
-        nested_dict = pprint.pprint(comp_teams)
-        print(nested_dict)
-    return nested_dict
+        # nested_dict = pprint.pprint(comp_teams)
+        # print(nested_dict)
+    return comp_teams
 
 get_comp_id()
 get_comp_teams(get_comp_id())
@@ -98,10 +99,13 @@ def create_teams_table(data, cur, conn):
 
 
 def main():
-    #json_data = read_data_from_file("pokemon.json")
+    comp_ids = get_comp_id()
+    print(comp_ids)
+    data = get_comp_teams(comp_ids)
+
     cur, conn = set_up_database("pokemon.db")
-    set_up_teams_table(json_data, cur, conn)
-    create_teams_table(json_data, cur, conn)
+    set_up_teams_table(data, cur, conn)
+    create_teams_table(data, cur, conn)
     conn.close()
     # FEEL FREE TO USE THIS SPACE TO TEST OUT YOUR FUNCTIONS
 
