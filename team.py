@@ -7,8 +7,9 @@ import requests
 def get_team_data():
 
     API_KEY = "0cd173cf1b864ce092037aec02a7fdcb"
-    team_url = "http://api.football-data.org/v4/teams"
-    resp = requests.get(team_url) 
+    team_url = "http://api.football-data.org/v4/teams/"
+    headers = {"X-Auth-Token": API_KEY}
+    resp = requests.get(team_url, headers=headers) 
     print(resp)
 
     team_list = []
@@ -26,3 +27,4 @@ def get_team_data():
     return None
 
 get_team_data()
+
