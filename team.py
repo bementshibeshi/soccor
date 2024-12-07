@@ -44,8 +44,6 @@ def get_comp_teams(comp_ids):
     
     return comp_teams  # Return the nested dictionary
 
-# Example usage
-
 comp_ids = get_comp_id()
 nested_dict = get_comp_teams(comp_ids)
 
