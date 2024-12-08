@@ -27,6 +27,7 @@ def get_comp_id():
         return None
 
 
+
 def get_comp_teams(comp_ids):
     API_KEY = "0cd173cf1b864ce092037aec02a7fdcb"
     comp_teams = {}  
@@ -56,22 +57,28 @@ def set_up_database(db_name):
 
 def set_up_teams_table(data, cur, conn):
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, name TEXT UNIQUE)"
+        "DROP TABLE IF EXISTS Teams)"
     )
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)"
+    # )
     
-    # print(data)
-    count = 0
-    for team in data.items():
-        # print(team)
+    # team_list = []
+    # #count = 0
+    # for team in data.items():
+    #     # print(team)
 
-        for name in team[1]:
-            team_name = name
-            # print(team_name)
-            count += 1
-            if team_name:
-                cur.execute(
-                    "INSERT OR IGNORE INTO Teams (id, name) VALUES (?, ?)", (count, team_name)
-                )
+    #     for name in team[1]:
+    #         team_name = name
+    #         # print(team_name)
+    #         #count += 1
+    #         team_list.append(team_name)
+
+    # for i in range(len(team_list)):    
+        
+    #     cur.execute(
+    #         "INSERT OR IGNORE INTO Teams (name) VALUES (?)", (team_list[i],)
+    #     )
     
     conn.commit()
 
@@ -83,7 +90,7 @@ def main():
 
     cur, conn = set_up_database("206_final.db")
     set_up_teams_table(data, cur, conn)
-    create_teams_table(data, cur, conn)
+    #create_teams_table(data, cur, conn)
     conn.close()
     # FEEL FREE TO USE THIS SPACE TO TEST OUT YOUR FUNCTIONS
 
