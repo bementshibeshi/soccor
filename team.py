@@ -3,7 +3,6 @@ import sqlite3
 import json
 import os
 import requests
-import pprint
 
 
 def get_comp_id():
@@ -27,7 +26,6 @@ def get_comp_id():
         return None
 
 
-
 def get_comp_teams(comp_ids):
     API_KEY = "0cd173cf1b864ce092037aec02a7fdcb"
     comp_teams = {}  
@@ -40,13 +38,14 @@ def get_comp_teams(comp_ids):
         if resp.status_code == 200:
             data = resp.json()  
             teams = data.get("teams", [])  
-            team_names = [team.get("name") for team in teams if team.get("name")] 
+            team_names = [team.get("shortName") for team in teams if team.get("shortName")]
+            # print(team_names)
+
             comp_teams[comp_id] = team_names 
         else:
             print(f"Failed to fetch teams for competition {comp_id}. Status code: {resp.status_code}")
             continue
     
-        nested_dict = pprint.pprint(comp_teams)
     return comp_teams
 
 def set_up_database(db_name):
@@ -56,29 +55,25 @@ def set_up_database(db_name):
     return cur, conn
 
 def set_up_teams_table(data, cur, conn):
+    cur.execute("DROP TABLE IF EXISTS Teams")
+
     cur.execute(
-        "DROP TABLE IF EXISTS Teams"
-    )
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS Teams (id INTEGER, name TEXT UNIQUE)"
+        "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, name TEXT UNIQUE)"
     )
     
-    team_list = []
-    #count = 0
+    # print(data)
     for team in data.items():
         # print(team)
 
         for name in team[1]:
             team_name = name
             # print(team_name)
-            #count += 1
-            team_list.append(team_name)
+            if team_name:
+                cur.execute(
+                    "INSERT OR IGNORE INTO Teams (name) VALUES (?)", (team_name,)
+                )
 
-    for i, team_name in enumerate(team_list, start=1):   
-        
-        cur.execute(
-            "INSERT OR IGNORE INTO Teams (id, name) VALUES (?, ?)", (i, team_name)
-        )
+            
     
     conn.commit()
 
@@ -90,10 +85,7 @@ def main():
 
     cur, conn = set_up_database("206_final.db")
     set_up_teams_table(data, cur, conn)
-    #create_teams_table(data, cur, conn)
     conn.close()
-    # FEEL FREE TO USE THIS SPACE TO TEST OUT YOUR FUNCTIONS
-
 
 if __name__ == "__main__":
     main()
