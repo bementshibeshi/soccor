@@ -57,28 +57,28 @@ def set_up_database(db_name):
 
 def set_up_teams_table(data, cur, conn):
     cur.execute(
-        "DROP TABLE IF EXISTS Teams)"
+        "DROP TABLE IF EXISTS Teams"
     )
-    # cur.execute(
-    #     "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE)"
-    # )
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS Teams (id INTEGER, name TEXT UNIQUE)"
+    )
     
-    # team_list = []
-    # #count = 0
-    # for team in data.items():
-    #     # print(team)
+    team_list = []
+    #count = 0
+    for team in data.items():
+        # print(team)
 
-    #     for name in team[1]:
-    #         team_name = name
-    #         # print(team_name)
-    #         #count += 1
-    #         team_list.append(team_name)
+        for name in team[1]:
+            team_name = name
+            # print(team_name)
+            #count += 1
+            team_list.append(team_name)
 
-    # for i in range(len(team_list)):    
+    for i, team_name in enumerate(team_list, start=1):   
         
-    #     cur.execute(
-    #         "INSERT OR IGNORE INTO Teams (name) VALUES (?)", (team_list[i],)
-    #     )
+        cur.execute(
+            "INSERT OR IGNORE INTO Teams (id, name) VALUES (?, ?)", (i, team_name)
+        )
     
     conn.commit()
 
