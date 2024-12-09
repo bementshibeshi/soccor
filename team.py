@@ -62,17 +62,18 @@ def get_comp_teams(comp_ids):
 def set_up_database(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
+    conn.execute("PRAGMA foreign_keys = ON;")
     cur = conn.cursor()
     return cur, conn
 
 
-def set_up_countryid_table(countryteams, cur, conn):
+def set_up_countryid_table(data, cur, conn):
     cur.execute("DROP TABLE IF EXISTS Countries")
 
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, country)")
 
-    for country in countryteams.keys():
-        print(country)
+    for country in data.keys():
+        # print(country)
         cur.execute("INSERT OR IGNORE INTO Countries (country) VALUES (?)", (country,))
 
     conn.commit()    
@@ -81,24 +82,31 @@ def set_up_teams_table(data, cur, conn):
     cur.execute("DROP TABLE IF EXISTS Teams")
 
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, name TEXT UNIQUE, country_id INTEGER)"
+        """CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, 
+            name TEXT UNIQUE, 
+            country_id INTEGER,
+            FOREIGN KEY (country_id) REFERENCES Countries (id))"""
     )
     
     # print(data)
-    for team in data.items():
-        # print(team)
+    for country, teams in data.items():
 
-        for name in team[1]:
-            team_name = name
-            # print(team_name)
-            if team_name:
+        cur.execute("SELECT id FROM Countries WHERE country = ?", (country,))
+        country_id = cur.fetchone()
+        
+        if country_id:
+            country_id = country_id[0]
+
+            for team_name in teams:
                 cur.execute(
-                    "INSERT OR IGNORE INTO Teams (name) VALUES (?)", (team_name,)
+                    """
+                    INSERT OR IGNORE INTO Teams (name, country_id) 
+                    VALUES (?, ?)
+                    """,
+                    (team_name, country_id)
                 )
-            
+
     conn.commit()
-
-
 
 
 def main():
@@ -107,8 +115,8 @@ def main():
     data = get_comp_teams(comp_ids)
 
     cur, conn = set_up_database("206_final.db")
-    set_up_teams_table(data, cur, conn)
     set_up_countryid_table(data, cur, conn)
+    set_up_teams_table(data, cur, conn)
     conn.close()
 
 if __name__ == "__main__":
