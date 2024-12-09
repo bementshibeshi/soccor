@@ -55,35 +55,52 @@ def get_matched_data(df, cur):
 
     matched_df = df[df['code'].isin(country_codes)]
 
-    print(matched_df)
+    # print(matched_df)
     return matched_df
 
 def get_month(matched_df):
+    
     if 'date' in matched_df.columns:
         matched_df['date'] = pd.to_datetime(matched_df['date'])
 
-        # Filter data for the year 2020
         df_2020 = matched_df[matched_df['date'].dt.year == 2020]
 
-        # Generate a month period and create an auxiliary column 'month'
         df_2020['month'] = df_2020['date'].dt.to_period('M')
 
-        # Find the last day of the month by grouping by 'month' and 'country'
         df_last_day_of_month = df_2020.sort_values('date').groupby(['month', 'country'], as_index=False).last()
 
-        # Ensure we're only capturing the required columns
         df_last_day_of_month['last_day_of_month'] = df_last_day_of_month['date'].dt.strftime('%Y-%m-%d')
         df_last_day_of_month = df_last_day_of_month[['last_day_of_month', 'country', 'code', 'cases']]  
 
-        # Sort the result for readability
         df_last_day_of_month = df_last_day_of_month.sort_values(by=['country', 'last_day_of_month']).reset_index(drop=True)
 
-        print(df_last_day_of_month)
+        # print(df_last_day_of_month)
 
     else:
         print("The expected 'date' column is not present in the data.")
 
     return df_last_day_of_month
+
+def insert_df_into_db(df, cur, conn):
+
+    cur.execute(f"DROP TABLE IF EXISTS Cases")
+
+    cur.execute(f'''
+        CREATE TABLE Cases (
+            last_day_of_month TEXT,
+            country TEXT,
+            code TEXT,
+            cases INTEGER
+        )
+    ''')
+
+    for _, row in df.iterrows():
+        cur.execute(f'''
+            INSERT INTO Cases (last_day_of_month, country, code, cases)
+            VALUES (?, ?, ?, ?)
+        ''', (row['last_day_of_month'], row['country'], row['code'], row['cases']))
+
+    conn.commit()
 
 def main():
     df = get_df()
@@ -94,7 +111,9 @@ def main():
         matched_df = get_matched_data(df, cur)
         print("Matched Data:")
 
-        get_month(matched_df)
+        casesdf = get_month(matched_df)
+
+        insert_df_into_db(casesdf, cur, conn)
 
         conn.close()
     else:
