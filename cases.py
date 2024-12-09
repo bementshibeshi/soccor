@@ -20,25 +20,6 @@ def get_df():
 
     return df
 
-def get_month(df):
-    if 'date' in df.columns:
-
-        df['date'] = pd.to_datetime(df['date'])
-
-        df['month'] = df['date'].dt.to_period('M')
-
-        df_last_day_of_month = df.groupby(['month', 'country']).apply(
-            lambda group: group[group['date'] == group['date'].max()]
-        ).reset_index(drop=True)
-
-        df_last_day_of_month['last_day_of_month'] = df_last_day_of_month['date'].dt.strftime('%Y-%m-%d')
-
-        df_last_day_of_month = df_last_day_of_month[['last_day_of_month', 'country', 'code', 'cases']]  
-
-        print(df_last_day_of_month)
-    else:
-        print("The expected 'date' column is not present in the data.")
-
 def set_up_database(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
@@ -67,13 +48,48 @@ def update_country_codes(df, cur, conn):
     
     conn.commit()
 
+def get_matched_data(df, cur):
+    cur.execute("SELECT country_code FROM Countries WHERE country_code IS NOT NULL")
+    country_codes = cur.fetchall()
+    country_codes = {code[0] for code in country_codes}
+
+    matched_df = df[df['code'].isin(country_codes)]
+
+    print(matched_df)
+    return matched_df
+
+def get_month(matched_df):
+    if 'date' in matched_df.columns:
+
+        matched_df['date'] = pd.to_datetime(matched_df['date'])
+
+        matched_df['month'] = matched_df['date'].dt.to_period('M')
+
+        df_last_day_of_month = matched_df.groupby(['month', 'country']).apply(
+            lambda group: group[group['date'] == group['date'].max()]
+        ).reset_index(drop=True)
+
+        df_last_day_of_month['last_day_of_month'] = df_last_day_of_month['date'].dt.strftime('%Y-%m-%d')
+
+        df_last_day_of_month = df_last_day_of_month[['last_day_of_month', 'country', 'code', 'cases']]  
+
+        print(df_last_day_of_month)
+    else:
+        print("The expected 'date' column is not present in the data.")
+
+    return df_last_day_of_month
+
+
 def main():
     df = get_df()
     if not df.empty:
-        get_month(df)
-
         cur, conn = set_up_database("206_final.db")
         update_country_codes(df, cur, conn)
+
+        matched_df = get_matched_data(df, cur)
+        print("Matched Data:")
+
+        get_month(matched_df)
 
         conn.close()
     else:
