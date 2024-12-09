@@ -63,6 +63,7 @@ def update_country_codes(df, cur, conn):
 
     for _, row in unique_countries.iterrows():
         country_name = row['country']
+        print(country_name)
         country_code = row['code']
         if country_name in countries_in_db:
             cur.execute('''UPDATE Countries SET country_code = ? WHERE country = ?''', (country_code, country_name))
