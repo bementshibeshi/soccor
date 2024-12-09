@@ -1,102 +1,82 @@
 import requests
 import json
 import pandas as pd
-<<<<<<< HEAD
 from datetime import datetime
-=======
-import os
 import sqlite3
->>>>>>> 8bc3b2acf4c1350640d2e7b598eaaf15471d7798
+import os
 
-# payload = {'code': 'ALL'}
-# URL = 'https://api.statworx.com/covid'
-# response = requests.post(url=URL, data=json.dumps(payload))
+def get_df():
 
-# if response.status_code == 200:
-#     data = response.json()
-#     # print(data)
+    payload = {'code': 'ALL'}
+    URL = 'https://api.statworx.com/covid'
+    response = requests.post(url=URL, data=json.dumps(payload))
 
-<<<<<<< HEAD
-    # Convert the response data to a DataFrame
-    df = pd.DataFrame.from_dict(json.loads(response.text)) 
+    if response.status_code == 200:
+        data = response.json()
+        # print(data)
 
-    # Check if the DataFrame contains the necessary columns
-    if 'date' in df.columns:
-        # Convert 'date' column to datetime format
-        df['date'] = pd.to_datetime(df['date'])
+        df = pd.DataFrame.from_dict(json.loads(response.text)) 
+        # print(df)
 
-        # Extract the year and month for easier filtering
-        df['month'] = df['date'].dt.to_period('M')  # This will give 'YYYY-MM' format
-
-        # Now, get the last record for each country per month
-        df_last_day_of_month = df.groupby(['month', 'country']).apply(lambda group: group[group['date'] == group['date'].max()]).reset_index(drop=True)
-
-        # Create a column for the last day of the month (this will be the last date from 'date' column)
-        df_last_day_of_month['last_day_of_month'] = df_last_day_of_month['date'].dt.strftime('%Y-%m-%d')
-
-        # Drop unnecessary columns
-        df_last_day_of_month = df_last_day_of_month[['last_day_of_month', 'country', 'cases']]  # Keep only the last_day_of_month, country, and cases columns
-
-        # Display the result for the last day of each month for every country
-        print(df_last_day_of_month)
     else:
-        print("The expected 'date' column is not present in the data.")
-else:
-    print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
-=======
-#     country = data['country']
-#     total_cases = data['cases']
+            print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
 
-#     df = pd.DataFrame({'Country': [country], 'Total Cases': [total_cases]})
+    return df
 
-#     print(df)
-# else:
-#     print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
+def get_month(df):
+        if 'date' in df.columns:
 
+            df['date'] = pd.to_datetime(df['date'])
+
+            df['month'] = df['date'].dt.to_period('M') 
+
+            df_last_day_of_month = df.groupby(['month', 'country']).apply(lambda group: group[group['date'] == group['date'].max()]).reset_index(drop=True)
+
+            df_last_day_of_month['last_day_of_month'] = df_last_day_of_month['date'].dt.strftime('%Y-%m-%d')
+
+            df_last_day_of_month = df_last_day_of_month[['last_day_of_month', 'country', 'cases']]  
+
+            print(df_last_day_of_month)
+        else:
+            print("The expected 'date' column is not present in the data.")\
+            
 def set_up_database(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
     conn.execute("PRAGMA foreign_keys = ON;")
     cur = conn.cursor()
     return cur, conn
-
-def get_code(cur, conn):
-
-    cur.execute("""SELECT country from Countries""")
-    countries = cur.fetchall()
-    print(countries)
-
-    payload = {'code': 'ALL'}
-    URL = 'https://api.statworx.com/covid'
-    response = requests.post(url=URL, data=json.dumps(payload))
-    
-    if response.status_code == 200:
-        data = response.json()
-        countrylist = []
-
-        for country in data:
-            country_name = country.get("name")
-            country_code = country.get("code")
-            if country_name and country_code:
-                countrylist.append((country_name, country_code))
         
-        print(countrylist)
+def update_country_codes(df, cur, conn):
 
+    unique_countries = df[['country', 'code']].drop_duplicates()
+
+    cur.execute("SELECT country FROM Countries")
+    countries_in_db = cur.fetchall()
+    countries_in_db = {country[0] for country in countries_in_db}
+
+    try:
         cur.execute('''ALTER TABLE Countries ADD COLUMN country_code TEXT''')
 
-        for country_name, country_code in countrylist:
+    except sqlite3.OperationalError:
+        pass
 
-            cur.execute(
-                '''UPDATE Countries SET country_code = ? WHERE country = ?''', (country_code, country_name)
-            )
-
-        conn.commit()
-
+    for _, row in unique_countries.iterrows():
+        country_name = row['country']
+        country_code = row['code']
+        if country_name in countries_in_db:
+            cur.execute('''UPDATE Countries SET country_code = ? WHERE country = ?''', (country_code, country_name))
+    
+    conn.commit()
+    
 def main():
+    df = get_df()
+    get_month(df)
+
     cur, conn = set_up_database("206_final.db")
-    get_code(cur, conn)
+    update_country_codes(df, cur, conn)
+
     conn.close()
 
 if __name__ == "__main__":
     main()
->>>>>>> 8bc3b2acf4c1350640d2e7b598eaaf15471d7798
