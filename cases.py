@@ -74,7 +74,7 @@ def get_month(matched_df):
 
         df_last_day_of_month = df_last_day_of_month.sort_values(by=['country', 'last_day_of_month']).reset_index(drop=True)
 
-        # print(df_last_day_of_month)
+        print(df_last_day_of_month)
 
     else:
         print("The expected 'date' column is not present in the data.")
