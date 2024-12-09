@@ -12,34 +12,29 @@ def get_df():
 
     if response.status_code == 200:
         data = response.json()
-        # Convert the response data into a DataFrame
+
         df = pd.DataFrame.from_dict(json.loads(response.text)) 
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
-        df = pd.DataFrame()  # Return an empty DataFrame in case of failure
+        df = pd.DataFrame() 
 
     return df
 
 def get_month(df):
     if 'date' in df.columns:
-        # Convert the 'date' column to datetime format
+
         df['date'] = pd.to_datetime(df['date'])
 
-        # Create a 'month' column to group data by month
         df['month'] = df['date'].dt.to_period('M')
 
-        # Get the last day of each month for every country
         df_last_day_of_month = df.groupby(['month', 'country']).apply(
             lambda group: group[group['date'] == group['date'].max()]
         ).reset_index(drop=True)
 
-        # Format the 'last_day_of_month' column
         df_last_day_of_month['last_day_of_month'] = df_last_day_of_month['date'].dt.strftime('%Y-%m-%d')
 
-        # Keep only the relevant columns for display
         df_last_day_of_month = df_last_day_of_month[['last_day_of_month', 'country', 'code', 'cases']]  
 
-        # Print the results with country and country codes
         print(df_last_day_of_month)
     else:
         print("The expected 'date' column is not present in the data.")
@@ -52,21 +47,18 @@ def set_up_database(db_name):
     return cur, conn
 
 def update_country_codes(df, cur, conn):
-    # Get unique country and country code pairs
+
     unique_countries = df[['country', 'code']].drop_duplicates()
 
-    # Get existing countries from the database
     cur.execute("SELECT country FROM Countries")
     countries_in_db = cur.fetchall()
     countries_in_db = {country[0] for country in countries_in_db}
 
-    # Add the 'country_code' column if it doesn't exist
     try:
         cur.execute('''ALTER TABLE Countries ADD COLUMN country_code TEXT''')
     except sqlite3.OperationalError:
         pass
 
-    # Update the country codes in the database
     for _, row in unique_countries.iterrows():
         country_name = row['country']
         country_code = row['code']
@@ -80,7 +72,6 @@ def main():
     if not df.empty:
         get_month(df)
 
-        # Set up the database and update country codes
         cur, conn = set_up_database("206_final.db")
         update_country_codes(df, cur, conn)
 
