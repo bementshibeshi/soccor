@@ -23,9 +23,7 @@ def get_country_names():
     if response.status_code == 200:
         data = response.json()
 
-
         country_name_list = []
-
 
         response_info = data.get("response", [])
 
@@ -36,38 +34,38 @@ def get_country_names():
         print(f"Error: {response.status_code} - {response.reason}")
         return None
 
-    # print(country_name_list)
+    print(country_name_list)
     return country_name_list
 
-def teams_to_countries(country_names):
-    
-    team = {}
 
+def teams_to_countries(country_names):
+    teams = {} 
     for country in country_names:
-        url = f"https://v3.football.api-sports.io/teams/country={country}"
+        url = f"https://v3.football.api-sports.io/teams?country={country}"
         headers = {
-        'x-rapidapi-key': API_KEY,
-        'x-rapidapi-host': 'v3.football.api-sports.io'
+            'x-rapidapi-key': API_KEY,
+            'x-rapidapi-host': 'v3.football.api-sports.io'
         }
 
-        response = requests.request("GET", url, headers=headers)
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             data = response.json()
-                
             response_info = data.get("response", [])
 
             for item in response_info:
-                
-                if item["country"] in team:
+                country_name = item["team"]["country"]  
+                team_name = item["team"]["name"] 
 
-                    team["country"] = item["name"]
-
+                if country_name in teams:
+                    teams[country_name].append(team_name)  
                 else:
-                    team["country"] = item["name"]
+                    teams[country_name] = [team_name]
+        else:
+            print(f"Failed to fetch data for {country}. Status code: {response.status_code}")
 
-    print(team)
-    return team
+    # pprint.pprint(teams)
+    return teams
 
 def set_up_database(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
@@ -80,8 +78,9 @@ def set_up_countries_table(data, cur, conn):
 
     cur.execute("DROP TABLE IF EXISTS Countries")
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, name TEXT UNIQUE)")
-
+    
     for country in data.items():
+
         countryname = country["name"]
         cur.execute(
             "INSERT OR IGNORE INTO Countries (name) VALUES (?)", (countryname,)
@@ -92,13 +91,16 @@ def set_up_countries_table(data, cur, conn):
 def main():
 
     country_data = get_country_names()
+
+    teams_to_countries(country_data)
+
     if not country_data:
         print("No country data retrieved. Exiting.")
         return
 
-    cur, conn = set_up_database("206_final.db")
-    set_up_countries_table(country_data, cur, conn)
-    conn.close()
+    # cur, conn = set_up_database("206_final.db")
+    # set_up_countries_table(country_data, cur, conn)
+    # conn.close()
 
 
 if __name__ == "__main__":
