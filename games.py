@@ -1,86 +1,124 @@
-# import sqlite3
-# import os
-# import requests
-# from datetime import datetime, timedelta
+import sqlite3
+import os
+import requests
+from datetime import datetime, timedelta
 
-# def set_up_database(db_name):
+def set_up_database(db_name):
 
-#     path = os.path.dirname(os.path.abspath(__file__))
-#     conn = sqlite3.connect(os.path.join(path, db_name))
-#     conn.execute("PRAGMA foreign_keys = ON;")
-#     cur = conn.cursor()
-#     return cur, conn
-
-
-# def get_canceled_games(cur, conn):
-
-#     start_date = datetime(2020, 5, 1)
-#     end_date = datetime(2020, 6, 1)
-
-#     date_list = []
-#     current_date = start_date
-
-#     while current_date <= end_date:
-#         date_list.append(current_date.strftime("%Y%m%d"))
-#         current_date += timedelta(days=1)
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(os.path.join(path, db_name))
+    conn.execute("PRAGMA foreign_keys = ON;")
+    cur = conn.cursor()
+    return cur, conn
 
 
-#     for date in date_list:
+def get_canceled_games(cur):
+
+    start_date = datetime(2020, 5, 1)
+    end_date = datetime(2020, 6, 1)
+
+    date_list = []
+    current_date = start_date
+
+    while current_date <= end_date:
+        date_list.append(current_date.strftime("%Y%m%d"))
+        current_date += timedelta(days=1)
+    print(date_list)
+
+    for date in date_list:
     
-#         url = "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date"
-#         querystring = {"date": {date}}
-#         headers = {
-#             "x-rapidapi-key": "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6",
-#             "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com"
-#         }
+        url = "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date"
+        querystring = {"date":{date}}
+        headers = {
+            "x-rapidapi-key": "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6",
+            "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com"
+        }
+    
+        response = requests.get(url, headers=headers, params=querystring)
 
-#         try:
-#             response = requests.get(url, headers=headers, params=querystring)
-#             data = response.json()
-#         except requests.RequestException as e:
-#             print(f"Error fetching data from API: {e}")
-#             return
-#         except ValueError:
-#             print("Error parsing JSON response.")
-#             return
+        if response.status_code == 200:
+            data = response.json()
+            # print(data)
 
-#         cur.execute("SELECT name FROM Teams")
-#         team_name = cur.fetchall()
-#         teamlist = [name[0] for name in team_name]
+            cur.execute("SELECT name FROM Teams")
+            team_name = cur.fetchall()
+            teamlist = [name[0] for name in team_name]
 
-#         matches = data.get('response', {}).get('matches', [])
-#         all_teams = set()
-#         canceled_games = []
-#         # matched_teams = []
+            matches = data.get('response', {}).get('matches', [])
+            canceled_games = []
+            allteams = []
 
-#         for match in matches:
-#             match_date = current_date.strftime("%Y%m%d")
-#             hometeam = match['home']['name']
-#             awayteam = match['away']['name']
-#             is_canceled = match['status']['cancelled']
+            for match in matches:
+                match_date = date
+                # print(match_date)
+                hometeam = match['home']['name']
+                awayteam = match['away']['name']
+                is_canceled = match['status']['cancelled']
+                # print(is_canceled)
 
-#             all_teams.add(hometeam)
-#             all_teams.add(awayteam)
-
-#             for team in teamlist:
-
-#                 if is_canceled and team in all_teams:
-
-#                     canceled_games.append({
-#                         "date": match_date,
-#                         "team": team
-#                     })
-
-#         # print(canceled_games)
+                if not matches:
+                    print(f"No matches found for date: {date}")
+                    continue  
 
 
+                if hometeam not in allteams:
+                    allteams.append(hometeam) 
 
-# def main():
+                if awayteam not in allteams:
+                    allteams.append(awayteam)
 
-#     cur, conn = set_up_database("206_final.db")
-#     get_canceled_games(cur, conn)
-#     conn.close()
+                if is_canceled:
+
+                    for team in allteams:
+                        if team in teamlist:
+                            cur.execute('''
+                                SELECT Countries.id
+                                FROM Teams
+                                JOIN Countries ON Teams.country_id = Countries.id
+                                WHERE Teams.name = ?
+                            ''', (team,))
+                            country_id = cur.fetchone()
+
+                            if country_id:
+                                canceled_games.append({
+                                    "date": match_date,
+                                    "team": team,
+                                    "country_id": country_id[0]
+                                })
+
+        else:
+            print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
+    print(f"Total canceled games found: {len(canceled_games)}")
+    # print(canceled_games)
+    return canceled_games
+
+def insert_to_db(canceled_data, cur, conn):
+
+    cur.execute("""DROP TABLE IF EXISTS Games_Canceled""")
+    
+    cur.execute(f'''
+    CREATE TABLE Games_Canceled (
+        date TEXT,
+        team TEXT,
+        country_id INTEGER
+    )
+    ''')
+
+    for game in canceled_data:
+        # print(game)
+        cur.execute('''
+            INSERT INTO Games_Canceled (date, team, country_id)
+            VALUES (?, ?, ?)
+        ''', (game['date'], game['team'], game['country_id']))
+
+    conn.commit()
+
+def main():
+    cur, conn = set_up_database("206_final.db")
+    canceled_data = get_canceled_games(cur)
+    insert_to_db(canceled_data, cur, conn)
+    conn.close()
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
