@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 import sqlite3
 import os
+import matplotlib.pyplot as plt
 
 def get_df():
     payload = {'code': 'ALL'}
@@ -102,6 +103,25 @@ def insert_df_into_db(df, cur, conn):
 
     conn.commit()
 
+def visualize_cases(df):
+    if not df.empty:
+        df['last_day_of_month'] = pd.to_datetime(df['last_day_of_month'])
+
+        grouped_df = df.groupby('country').agg({'cases': 'sum'}).reset_index()
+
+        grouped_df = grouped_df.sort_values('cases', ascending=False)
+
+        plt.barh(grouped_df['country'], grouped_df['cases'], color='skyblue')
+        
+        plt.title("Total COVID-19 Cases per Country (2020)")
+        plt.xlabel("Total Cases")
+        plt.ylabel("Country")
+        plt.tight_layout()
+        plt.show()
+
+    else:
+        print("The DataFrame is empty. Cannot visualize data.")
+
 def main():
     df = get_df()
     if not df.empty:
@@ -114,6 +134,8 @@ def main():
         casesdf = get_month(matched_df)
 
         insert_df_into_db(casesdf, cur, conn)
+        
+        visualize_cases(casesdf)
 
         conn.close()
     else:
