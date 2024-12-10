@@ -1,19 +1,21 @@
-import requests
+# import unittest
+# import sqlite3
+# import json
+# import os
+# import requests
+# import pprint
 
-def get_games_cancelled():
-    API_KEY = "ddcbb4fe7a924d672ecd0dcd73aee729"  # Use your API key here
-    team_url = "https://api.soccersapi.com/v2.2/fixtures/?user={{bemnet}}&token={{ddcbb4fe7a924d672ecd0dcd73aee729}}"
-    headers = {"X-Auth-Token": API_KEY}
-    
-    # Make the request with the correct headers
-    resp = requests.get(team_url, headers=headers)
-    
-    # Check if the request was successful
-    if resp.status_code == 200:
-        data = resp.json()
-        print(data)  # Optionally print the data or process it as needed
-    else:
-        print(f"Failed to fetch data. Status code: {resp.status_code}, Reason: {resp.reason}")
+# def get_games_cancelled():
 
-# Call the function
-get_games_cancelled()
+#     API_KEY = "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6"
+#     url = "https://api.soccerfootball.info/v1/matches/day/basic/?d=DATE"
+#     headers = {"X-Auth-Token": API_KEY}
+    
+#     headers = {
+#         "x-rapidapi-key": API_KEY,
+#         "x-rapidapi-host": "soccer-football-info.p.rapidapi.com"
+#     }
+
+#     response = requests.get(url, headers=headers)
+
+#     print(response.json())
