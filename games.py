@@ -1,37 +1,86 @@
-import unittest
-import sqlite3
-import json
-import os
-import requests
-import pprint
+# import sqlite3
+# import os
+# import requests
+# from datetime import datetime, timedelta
 
-# def get_games_cancelled():
+# def set_up_database(db_name):
 
-#     API_KEY = "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6"
-#     url = "https://api.soccerfootball.info/v1/matches/day/basic/?d=DATE"
-#     headers = {"X-Auth-Token": API_KEY}
+#     path = os.path.dirname(os.path.abspath(__file__))
+#     conn = sqlite3.connect(os.path.join(path, db_name))
+#     conn.execute("PRAGMA foreign_keys = ON;")
+#     cur = conn.cursor()
+#     return cur, conn
+
+
+# def get_canceled_games(cur, conn):
+
+#     start_date = datetime(2020, 5, 1)
+#     end_date = datetime(2020, 6, 1)
+
+#     date_list = []
+#     current_date = start_date
+
+#     while current_date <= end_date:
+#         date_list.append(current_date.strftime("%Y%m%d"))
+#         current_date += timedelta(days=1)
+
+
+#     for date in date_list:
     
-#     headers = {
-#         "x-rapidapi-key": API_KEY,
-#         "x-rapidapi-host": "soccer-football-info.p.rapidapi.com"
-#     }
+#         url = "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date"
+#         querystring = {"date": {date}}
+#         headers = {
+#             "x-rapidapi-key": "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6",
+#             "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com"
+#         }
 
-#     response = requests.get(url, headers=headers)
+#         try:
+#             response = requests.get(url, headers=headers, params=querystring)
+#             data = response.json()
+#         except requests.RequestException as e:
+#             print(f"Error fetching data from API: {e}")
+#             return
+#         except ValueError:
+#             print("Error parsing JSON response.")
+#             return
 
-#     print(response.json())
+#         cur.execute("SELECT name FROM Teams")
+#         team_name = cur.fetchall()
+#         teamlist = [name[0] for name in team_name]
 
-import requests
+#         matches = data.get('response', {}).get('matches', [])
+#         all_teams = set()
+#         canceled_games = []
+#         # matched_teams = []
 
-url = "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date"
+#         for match in matches:
+#             match_date = current_date.strftime("%Y%m%d")
+#             hometeam = match['home']['name']
+#             awayteam = match['away']['name']
+#             is_canceled = match['status']['cancelled']
 
-querystring = {"date":"20200625"}
+#             all_teams.add(hometeam)
+#             all_teams.add(awayteam)
 
-headers = {
-	"x-rapidapi-key": "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6",
-	"x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com"
-}
+#             for team in teamlist:
 
-response = requests.get(url, headers=headers, params=querystring)
+#                 if is_canceled and team in all_teams:
 
-print(response.json())
+#                     canceled_games.append({
+#                         "date": match_date,
+#                         "team": team
+#                     })
 
+#         # print(canceled_games)
+
+
+
+# def main():
+
+#     cur, conn = set_up_database("206_final.db")
+#     get_canceled_games(cur, conn)
+#     conn.close()
+
+
+# if __name__ == "__main__":
+#     main()
