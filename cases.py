@@ -155,25 +155,15 @@ def insert_df_into_db(df, cur, conn):
 
 
 def visualize_cases(df):
-    """
-    Visualizes COVID-19 cases as a pie chart for the top 10 countries.
-
-    Args:
-        df : A DataFrame containing cases data.
-    """
     if not df.empty:
-        # Ensure 'last_day_of_month' is datetime
         df['last_day_of_month'] = pd.to_datetime(df['last_day_of_month'])
 
-        # Group by 'country', summing the cases
         total_cases_per_country = df.groupby('country')['cases'].sum()
 
-        # Sort the countries by total cases and select the top 10
         top_10_countries = total_cases_per_country.sort_values(ascending=False).head(10)
 
-        # Plot the pie chart for the top 10 countries
         plt.figure(figsize=(10, 10))
-        colors = plt.cm.Paired(range(len(top_10_countries)))  # Adjust colors for the top 10 countries
+        colors = plt.cm.Paired(range(len(top_10_countries)))
         top_10_countries.plot.pie(
             autopct='%1.1f%%',
             colors=colors,
@@ -181,7 +171,7 @@ def visualize_cases(df):
             fontsize=10,
             legend=False
         )
-        plt.ylabel('')  # Remove default ylabel
+        plt.ylabel('')
         plt.title("Top 10 Countries with the Most COVID-19 Cases", fontsize=14)
         plt.tight_layout()
         plt.show()
