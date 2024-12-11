@@ -4,6 +4,7 @@ import json
 import os
 import requests
 import pprint
+import matplotlib.pyplot as plt
 
 
 def get_comp_id():
@@ -153,6 +154,43 @@ def set_up_teams_table(data, cur, conn):
 
     conn.commit()
 
+def create_bar_chart(db_name):
+    
+    path = os.path.dirname(os.path.abspath(__file__))
+    conn = sqlite3.connect(os.path.join(path, db_name))
+    cur = conn.cursor()
+
+    query = """
+    SELECT Countries.country, COUNT(Teams.id) AS team_count
+    FROM Teams
+    JOIN Countries ON Teams.country_id = Countries.id
+    GROUP BY Countries.country
+    """
+    cur.execute(query)
+    data = cur.fetchall()
+
+    conn.close()
+
+    countries = [row[0] for row in data]
+    team_counts = [row[1] for row in data]
+
+    plt.figure(figsize=(12, 6))
+    bars = plt.bar(countries, team_counts, color="skyblue")
+    plt.xlabel("Country", fontsize=12)
+    plt.ylabel("Number of Teams", fontsize=12)
+    plt.title("Number of Teams per Country", fontsize=14)
+    plt.xticks(rotation=45, ha="right")
+
+    for bar, count in zip(bars, team_counts):
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height, str(count), ha='center', va='bottom', fontsize=10)
+
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == "__main__":
+    create_bar_chart("206_final.db")
 
 def main():
     comp_ids = get_comp_id()
