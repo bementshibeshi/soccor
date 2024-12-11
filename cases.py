@@ -7,6 +7,13 @@ import os
 import matplotlib.pyplot as plt
 
 def get_df():
+    """
+    Fetches COVID-19 data from the Statworx API.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing COVID-19 data for all countries, 
+        or an empty DataFrame if the request fails.
+    """
     payload = {'code': 'ALL'}
     URL = 'https://api.statworx.com/covid'
     response = requests.post(url=URL, data=json.dumps(payload))
@@ -22,6 +29,15 @@ def get_df():
     return df
 
 def set_up_database(db_name):
+    """
+    Sets up the SQLite database connection and enables foreign keys.
+
+    Args:
+        db_name (str): The name of the SQLite database file.
+
+    Returns:
+        tuple: A tuple containing the cursor and connection objects.
+    """
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -29,6 +45,14 @@ def set_up_database(db_name):
     return cur, conn
 
 def update_country_codes(df, cur, conn):
+    """
+    Updates the 'Countries' table with country codes from the DataFrame.
+
+    Args:
+        df: A DataFrame containing country and code data.
+        cur: Cursor object for database operations.
+        conn: Connection object for the database.
+    """
 
     unique_countries = df[['country', 'code']].drop_duplicates()
 
@@ -50,6 +74,16 @@ def update_country_codes(df, cur, conn):
     conn.commit()
 
 def get_matched_data(df, cur):
+    """
+    Filters the DataFrame to include only countries with matched codes in the database.
+
+    Args:
+        df (pd.DataFrame): A DataFrame containing country and code data.
+        cur: Cursor object for database operations.
+
+    Returns:
+        pd.DataFrame: A filtered DataFrame with matched country codes.
+    """
     cur.execute("SELECT country_code FROM Countries WHERE country_code IS NOT NULL")
     country_codes = cur.fetchall()
     country_codes = {code[0] for code in country_codes}
@@ -60,7 +94,15 @@ def get_matched_data(df, cur):
     return matched_df
 
 def get_month(matched_df):
-    
+    """
+    Processes the DataFrame to extract the last day of each month's data for 2020.
+
+    Args:
+        matched_df: A DataFrame containing matched country data.
+
+    Returns:
+        pd.DataFrame: A DataFrame with data for the last day of each month in 2020.
+    """
     if 'date' in matched_df.columns:
         matched_df['date'] = pd.to_datetime(matched_df['date'])
 
@@ -83,6 +125,14 @@ def get_month(matched_df):
     return df_last_day_of_month
 
 def insert_df_into_db(df, cur, conn):
+    """
+    Inserts a DataFrame into the 'Cases' table in the database.
+
+    Args:
+        df (pd.DataFrame): A DataFrame containing cases data.
+        cur: Cursor object for database operations.
+        conn: Connection object for the database.
+    """
 
     cur.execute(f"DROP TABLE IF EXISTS Cases")
 
@@ -105,6 +155,12 @@ def insert_df_into_db(df, cur, conn):
 
 import seaborn as sns
 def visualize_cases(df):
+    """
+    Visualizes COVID-19 cases for the top 3 countries with the most cases.
+
+    Args:
+        df : A DataFrame containing cases data.
+    """    
     if not df.empty:
         # Ensure 'last_day_of_month' is datetime
         df['last_day_of_month'] = pd.to_datetime(df['last_day_of_month'])
