@@ -24,13 +24,14 @@ def get_canceled_games(cur):
         date_list.append(current_date.strftime("%Y%m%d"))
         current_date += timedelta(days=1)
     print(date_list)
-
+    canceled_games = []g
     for date in date_list:
+        print(date)
     
         url = "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date"
         querystring = {"date":{date}}
         headers = {
-            "x-rapidapi-key": "acf0777e33msha5e9de947da5ee5p1797f8jsnbb4a8ec0bba6",
+            "x-rapidapi-key": "3088ad0d02msh18679a1f27d9af9p12a499jsna45b809e908b",
             "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com"
         }
     
@@ -45,7 +46,7 @@ def get_canceled_games(cur):
             teamlist = [name[0] for name in team_name]
 
             matches = data.get('response', {}).get('matches', [])
-            canceled_games = []
+            
             allteams = []
 
             for match in matches:
