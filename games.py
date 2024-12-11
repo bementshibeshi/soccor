@@ -134,11 +134,15 @@ def canceled_games_country(cur, conn):
 
     conn.close()
 
-    df = pd.DataFrame(data, columns=['Country', 'Canceled Games'])
+    df = pd.DataFrame(data, columns=['Teams', 'Canceled Games'])
 
     plt.figure(figsize=(12, 6))
-    plt.bar(df['Country'], df['Canceled Games'], color='skyblue')
+    bars = plt.bar(df['Teams'], df['Canceled Games'], color='lightgreen')
 
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.5, str(int(height)), ha='center', va='bottom', fontsize=10)\
+        
     plt.title('Number of Canceled Games per Country', fontsize=16)
     plt.xlabel('Country', fontsize=12)
     plt.ylabel('Canceled Games', fontsize=12)
@@ -148,7 +152,7 @@ def canceled_games_country(cur, conn):
     plt.show()
 
 def canceled_games_team(cur, conn):
-    
+
     query = '''
     SELECT Teams.name AS team, COUNT(Games_Canceled.team) AS canceled_count
     FROM Games_Canceled
@@ -161,15 +165,15 @@ def canceled_games_team(cur, conn):
 
     conn.close()
 
-    # Create a DataFrame
     df = pd.DataFrame(data, columns=['Teams', 'Canceled Games'])
-
-    # Select the top 10 teams
     top_teams = df.head(10)
 
-    # Plot the top 10 teams
     plt.figure(figsize=(12, 6))
-    plt.bar(top_teams['Teams'], top_teams['Canceled Games'], color='pink')
+    bars = plt.bar(top_teams['Teams'], top_teams['Canceled Games'], color='pink')
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.5, str(int(height)), ha='center', va='bottom', fontsize=10)
 
     plt.title('Top 10 Teams with the Most Canceled Games', fontsize=16)
     plt.xlabel('Teams', fontsize=12)
@@ -177,8 +181,7 @@ def canceled_games_team(cur, conn):
     plt.xticks(rotation=45, ha='right')
 
     plt.tight_layout()
-    # plt.show()
-
+    plt.show()
 
 
 def main():
@@ -186,7 +189,7 @@ def main():
     # canceled_data = get_canceled_games(cur) do not run api again unless you need the data
     # insert_to_db(canceled_data, cur, conn)
     canceled_games_country(cur, conn)
-    canceled_games_team(cur, conn)
+    # canceled_games_team(cur, conn)
     conn.close()
 
 
