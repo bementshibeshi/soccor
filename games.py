@@ -228,6 +228,12 @@ def average_canceled_games_per_month(cur, conn):
     plt.tight_layout()
     plt.show()
 
+    # Write the calculated averages to a text file
+    with open("average_canceled_games.txt", "w") as file:
+        file.write("Average Canceled Games Per Day (March - June)\n")
+        for i, avg in enumerate(avg_per_month):
+            file.write(f"{month_names[i]}: {avg:.2f} canceled games per day\n")
+
     return avg_per_month
   
 
@@ -270,6 +276,8 @@ def main():
     #insert_to_db(canceled_data, cur, conn)
     #canceled_games_country(cur, conn)
     average_canceled_games_per_month(cur, conn)
+    print(f"Average canceled games per day for March to June: {avg_per_month}")
+   
     #canceled_games_team(cur, conn)
     conn.close()
 
