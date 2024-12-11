@@ -9,6 +9,12 @@ API_KEY = "32fb007eb213dce09cf03a5cb3edfc00"
 
 
 def get_country_names():
+    """
+    Fetches a list of country names where football teams are available.
+
+    Returns:
+        list: A list of country names.
+    """
     url = "https://v3.football.api-sports.io/teams/countries"
 
     headers = {
@@ -39,6 +45,15 @@ def get_country_names():
 
 
 def teams_to_countries(country_names):
+    """
+    Fetches teams for each country and maps them.
+
+    Args:
+        country_names (list): A list of country names.
+
+    Returns:
+        dict: A dictionary mapping country names to lists of team names.
+    """
     teams = {} 
     for country in country_names:
         url = f"https://v3.football.api-sports.io/teams?country={country}"
@@ -68,6 +83,16 @@ def teams_to_countries(country_names):
     return teams
 
 def set_up_database(db_name):
+    """
+    Sets up a SQLite database connection.
+
+    Args:
+        db_name (str): Name of the database file.
+
+    Returns:
+        cur: Cursor object for database operations.
+        conn: Connection object for the database.
+    """
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
     cur = conn.cursor()
@@ -75,7 +100,14 @@ def set_up_database(db_name):
 
 
 def set_up_countries_table(data, cur, conn):
+    """
+    Creates and populates the Teams table in the database.
 
+    Args:
+        data (dict): A dictionary mapping country names to team names.
+        cur: Cursor object for database operations.
+        conn: Connection object for the database.
+    """
     cur.execute("DROP TABLE IF EXISTS Countries")
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, name TEXT UNIQUE)")
     

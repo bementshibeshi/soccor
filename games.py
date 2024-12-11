@@ -89,7 +89,7 @@ def get_canceled_games(cur):
         else:
             print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
     print(f"Total canceled games found: {len(canceled_games)}")
-    # print(canceled_games)
+    print(canceled_games)
     return canceled_games
 
 def insert_to_db(canceled_data, cur, conn):
