@@ -14,7 +14,7 @@ def set_up_database(db_name):
 
 def get_canceled_games(cur):
 
-    start_date = datetime(2020, 5, 1)
+    start_date = datetime(2020, 3, 1)
     end_date = datetime(2020, 6, 1)
 
     date_list = []
