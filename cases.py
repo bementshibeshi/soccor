@@ -156,27 +156,36 @@ def insert_df_into_db(df, cur, conn):
 
 def visualize_cases(df):
     if not df.empty:
-        # Ensure 'last_day_of_month' is datetime
         df['last_day_of_month'] = pd.to_datetime(df['last_day_of_month'])
 
-        # Group by 'country', summing the cases
-        total_cases_per_country = df.groupby('country')['cases'].sum()
+        # Group by 'last_day_of_month' and 'country', summing the cases
+        grouped_df = df.groupby(['last_day_of_month', 'country']).agg({'cases': 'sum'}).reset_index()
 
-        # Sort the countries by total cases and select the top 10
-        top_10_countries = total_cases_per_country.sort_values(ascending=False).head(10)
+        # Create a pivot table for easier plotting
+        pivot_df = grouped_df.pivot(index='last_day_of_month', columns='country', values='cases')
 
-        # Plot the pie chart for the top 10 countries
-        plt.figure(figsize=(10, 10))
-        colors = plt.cm.Paired(range(len(top_10_countries)))  # Adjust colors for the top 10 countries
-        top_10_countries.plot.pie(
-            autopct='%1.1f%%',
-            colors=colors,
-            startangle=90,
-            fontsize=10,
-            legend=False
-        )
-        plt.ylabel('')  # Remove default ylabel
-        plt.title("Top 10 Countries with the Most COVID-19 Cases", fontsize=14)
+        # Calculate the total cases for each country
+        total_cases_per_country = pivot_df.sum().sort_values(ascending=False)
+
+        # Select the top 3 countries
+        top_3_countries = total_cases_per_country.head(3).index
+
+        # Filter the pivot table to include only the top 3 countries
+        top_3_df = pivot_df[top_3_countries]
+
+        # Set up the color palette
+        palette = sns.color_palette("tab10", len(top_3_df.columns))  # Adjust colors for the top 3 countries
+
+        # Plot
+        ax = top_3_df.plot(kind='bar', stacked=False, figsize=(14, 8), color=palette, width=0.8)
+        ax.set_title("Top 3 Countries with the Most COVID-19 Cases by Date", fontsize=16)
+        ax.set_xlabel("Date", fontsize=12)
+        ax.set_ylabel("Total Cases", fontsize=12)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")  # Rotate x labels for better readability
+
+        # Display legend
+        plt.legend(title='Countries', bbox_to_anchor=(1.05, 1), loc='upper left')
+
         plt.tight_layout()
         plt.show()
 
