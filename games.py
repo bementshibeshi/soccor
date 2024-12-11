@@ -147,12 +147,50 @@ def canceled_games_country(cur, conn):
     plt.tight_layout()
     plt.show()
 
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+def canceled_games_team(cur, conn):
+    
+    query = '''
+    SELECT Teams.name AS team, COUNT(Games_Canceled.team) AS canceled_count
+    FROM Games_Canceled
+    JOIN Teams ON Games_Canceled.team = Teams.name
+    GROUP BY Teams.name
+    ORDER BY canceled_count DESC
+    '''
+    cur.execute(query)
+    data = cur.fetchall()
+
+    conn.close()
+
+    # Create a DataFrame
+    df = pd.DataFrame(data, columns=['Teams', 'Canceled Games'])
+
+    # Select the top 10 teams
+    top_teams = df.head(10)
+
+    # Plot the top 10 teams
+    plt.figure(figsize=(12, 6))
+    plt.bar(top_teams['Teams'], top_teams['Canceled Games'], color='pink')
+
+    plt.title('Top 10 Teams with the Most Canceled Games', fontsize=16)
+    plt.xlabel('Teams', fontsize=12)
+    plt.ylabel('Canceled Games', fontsize=12)
+    plt.xticks(rotation=45, ha='right')
+
+    plt.tight_layout()
+    plt.show()
+
+
 
 def main():
     cur, conn = set_up_database("206_final.db")
     # canceled_data = get_canceled_games(cur) do not run api again unless you need the data
     # insert_to_db(canceled_data, cur, conn)
-    canceled_games_country(cur, conn)
+    # canceled_games_country(cur, conn)
+    canceled_games_team(cur, conn)
     conn.close()
 
 
