@@ -147,10 +147,6 @@ def canceled_games_country(cur, conn):
     plt.tight_layout()
     plt.show()
 
-import pandas as pd
-import matplotlib.pyplot as plt
-
-
 def canceled_games_team(cur, conn):
     
     query = '''
@@ -181,7 +177,7 @@ def canceled_games_team(cur, conn):
     plt.xticks(rotation=45, ha='right')
 
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
 
 
@@ -189,7 +185,7 @@ def main():
     cur, conn = set_up_database("206_final.db")
     # canceled_data = get_canceled_games(cur) do not run api again unless you need the data
     # insert_to_db(canceled_data, cur, conn)
-    # canceled_games_country(cur, conn)
+    canceled_games_country(cur, conn)
     canceled_games_team(cur, conn)
     conn.close()
 
