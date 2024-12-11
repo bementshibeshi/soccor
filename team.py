@@ -7,6 +7,16 @@ import pprint
 
 
 def get_comp_id():
+    """
+    Fetches teams for each competition ID and organizes them by their country.
+    
+    Args:
+        comp_ids (list): A list of competition IDs.
+        
+    Returns:
+        dict: A dictionary where keys are country names and values are lists of team short names
+              associated with that country.
+    """
     API_KEY = "0cd173cf1b864ce092037aec02a7fdcb"
     team_url = "http://api.football-data.org/v4/competitions/"
     headers = {"X-Auth-Token": API_KEY}
@@ -28,6 +38,16 @@ def get_comp_id():
 
 
 def get_comp_teams(comp_ids):
+    """
+    Fetches teams for each competition ID and organizes them by their country.
+    
+    Args:
+        comp_ids (list): A list of competition IDs.
+        
+    Returns:
+        dict: A dictionary where keys are country names and values are lists of team short names
+              associated with that country.
+    """
     API_KEY = "0cd173cf1b864ce092037aec02a7fdcb"
     countryteams = {}
 
@@ -60,6 +80,15 @@ def get_comp_teams(comp_ids):
 
 
 def set_up_database(db_name):
+    """
+    Sets up a connection to a SQLite database and enables foreign key support.
+    
+    Args:
+        db_name (str): The name of the SQLite database file to create or connect to.
+    
+    Returns:
+        tuple: A tuple containing the cursor and connection objects for the database.
+    """
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(path + "/" + db_name)
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -68,6 +97,14 @@ def set_up_database(db_name):
 
 
 def set_up_countryid_table(data, cur, conn):
+    """
+    Creates and populates a 'Countries' table in the database with data from a dictionary.
+    
+    Args:
+        data (dict): A dictionary where keys are country names.
+        cur : Cursor object to execute SQLite commands.
+        conn : Connection object to commit changes to the database.
+    """
     cur.execute("DROP TABLE IF EXISTS Countries")
 
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, country)")
@@ -79,6 +116,14 @@ def set_up_countryid_table(data, cur, conn):
     conn.commit()    
 
 def set_up_teams_table(data, cur, conn):
+    """
+    Creates and populates a 'Teams' table in the database with data from a dictionary.
+    
+    Args:
+        data (dict): A dictionary where keys are country names and values are lists of team names.
+        cur: Cursor object to execute SQLite commands.
+        conn: Connection object to commit changes to the database.
+    """
     cur.execute("DROP TABLE IF EXISTS Teams")
 
     cur.execute(
