@@ -119,51 +119,40 @@ def insert_to_db(canceled_data, cur, conn):
 
     conn.commit()
 
-def visualize_canceled_games(db_name):
-    # Connect to the database
-    conn = sqlite3.connect(db_name)
-    cur = conn.cursor()
+def canceled_games_country(cur, conn):
 
     # Query to get the number of canceled games per country
     query = '''
-    SELECT Countries.name AS country, COUNT(Games_Canceled.country_id) AS canceled_count
+    SELECT Countries.country AS country, COUNT(Games_Canceled.country_id) AS canceled_count
     FROM Games_Canceled
     JOIN Countries ON Games_Canceled.country_id = Countries.id
-    GROUP BY Countries.name
+    GROUP BY Countries.country
     ORDER BY canceled_count DESC
     '''
     cur.execute(query)
     data = cur.fetchall()
 
-    # Close the database connection
     conn.close()
 
-    # Convert the data into a DataFrame
     df = pd.DataFrame(data, columns=['Country', 'Canceled Games'])
 
-    # Create the bar plot
     plt.figure(figsize=(12, 6))
     plt.bar(df['Country'], df['Canceled Games'], color='skyblue')
 
-    # Add titles and labels
     plt.title('Number of Canceled Games per Country', fontsize=16)
     plt.xlabel('Country', fontsize=12)
     plt.ylabel('Canceled Games', fontsize=12)
     plt.xticks(rotation=45, ha='right')
 
-    # Adjust layout for better display
     plt.tight_layout()
-
-    # Show the plot
     plt.show()
 
-# Call the function with your database file
-visualize_canceled_games("206_final.db")
 
 def main():
     cur, conn = set_up_database("206_final.db")
-    canceled_data = get_canceled_games(cur)
-    insert_to_db(canceled_data, cur, conn)
+    # canceled_data = get_canceled_games(cur) do not run api again unless you need the data
+    # insert_to_db(canceled_data, cur, conn)
+    canceled_games_country(cur, conn)
     conn.close()
 
 
