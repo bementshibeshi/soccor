@@ -23,10 +23,12 @@ def get_canceled_games(cur):
     while current_date <= end_date:
         date_list.append(current_date.strftime("%Y%m%d"))
         current_date += timedelta(days=1)
-    print(date_list)
-    canceled_games = []g
+    # print(date_list)
+
+    canceled_games = []
+
     for date in date_list:
-        print(date)
+        # print(date)
     
         url = "https://free-api-live-football-data.p.rapidapi.com/football-get-matches-by-date"
         querystring = {"date":{date}}
@@ -90,25 +92,26 @@ def get_canceled_games(cur):
         else:
             print(f"Failed to fetch data. Status code: {response.status_code}, Reason: {response.reason}")
     print(f"Total canceled games found: {len(canceled_games)}")
-    print(canceled_games)
+    # print(canceled_games)
     return canceled_games
 
 def insert_to_db(canceled_data, cur, conn):
 
     cur.execute("""DROP TABLE IF EXISTS Games_Canceled""")
     
-    cur.execute(f'''
+    cur.execute('''
     CREATE TABLE Games_Canceled (
         date TEXT,
         team TEXT,
-        country_id INTEGER
+        country_id INTEGER,
+        UNIQUE (date, team, country_id)
     )
     ''')
 
     for game in canceled_data:
         # print(game)
         cur.execute('''
-            INSERT INTO Games_Canceled (date, team, country_id)
+            INSERT OR IGNORE INTO Games_Canceled (date, team, country_id)
             VALUES (?, ?, ?)
         ''', (game['date'], game['team'], game['country_id']))
 
