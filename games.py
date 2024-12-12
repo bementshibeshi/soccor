@@ -138,7 +138,6 @@ def insert_to_db(canceled_data, cur, conn):
 
 def canceled_games_country(cur, conn):
 
-    # Query to get the number of canceled games per country
     query = '''
     SELECT Countries.country AS country, COUNT(Games_Canceled.country_id) AS canceled_count
     FROM Games_Canceled
@@ -220,7 +219,6 @@ def average_canceled_games_per_month(cur, conn):
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2, height + 0.05, f'{height:.2f}', ha='center', va='bottom', fontsize=10)
 
-    # Customize the graph
     plt.title('Average Canceled Games Per Day (March - June)', fontsize=16)
     plt.xlabel('Month', fontsize=12)
     plt.ylabel('Average Canceled Games', fontsize=12)
@@ -228,7 +226,6 @@ def average_canceled_games_per_month(cur, conn):
     plt.tight_layout()
     plt.show()
 
-    # Write the calculated averages to a text file
     with open("average_canceled_games.txt", "w") as file:
         file.write("Average Canceled Games Per Day (March - June)\n")
         for i, avg in enumerate(avg_per_month):
@@ -276,13 +273,9 @@ def main():
     #insert_to_db(canceled_data, cur, conn)
     #canceled_games_country(cur, conn)
     average_canceled_games_per_month(cur, conn)
-    print(f"Average canceled games per day for March to June: {avg_per_month}")
-   
     #canceled_games_team(cur, conn)
     conn.close()
 
 
 if __name__ == "__main__":
     main()
-
-#//average number of canceled games per month
