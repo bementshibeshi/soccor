@@ -106,7 +106,9 @@ def set_up_countryid_table(data, cur, conn):
         cur : Cursor object to execute SQLite commands.
         conn : Connection object to commit changes to the database.
     """
+    cur.execute("PRAGMA foreign_keys = OFF;")
     cur.execute("DROP TABLE IF EXISTS Countries")
+    cur.execute("PRAGMA foreign_keys = ON;")
 
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, country)")
 
@@ -154,11 +156,7 @@ def set_up_teams_table(data, cur, conn):
 
     conn.commit()
 
-def create_bar_chart(db_name):
-    
-    path = os.path.dirname(os.path.abspath(__file__))
-    conn = sqlite3.connect(os.path.join(path, db_name))
-    cur = conn.cursor()
+def num_teams_country(cur, conn):
 
     query = """
     SELECT Countries.country, COUNT(Teams.id) AS team_count
@@ -189,9 +187,6 @@ def create_bar_chart(db_name):
     plt.show()
 
 
-if __name__ == "__main__":
-    create_bar_chart("206_final.db")
-
 def main():
     comp_ids = get_comp_id()
     # print(comp_ids)
@@ -200,6 +195,7 @@ def main():
     cur, conn = set_up_database("206_final.db")
     set_up_countryid_table(data, cur, conn)
     set_up_teams_table(data, cur, conn)
+    num_teams_country(cur, conn)
     conn.close()
 
 if __name__ == "__main__":
