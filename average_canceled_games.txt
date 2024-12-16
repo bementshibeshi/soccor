@@ -1,4 +1,4 @@
-Average Canceled Games Per Day (March - June)
+Average Canceled Games Per Day Per Month (March - June)
 March: 14.97 canceled games per day
 April: 14.43 canceled games per day
 May: 11.35 canceled games per day

@@ -130,7 +130,6 @@ def insert_to_db(canceled_data, cur, conn):
     Returns:
         None
     """
-    cur.execute("""DROP TABLE IF EXISTS Games_Canceled""")
     
     cur.execute('''
     CREATE TABLE Games_Canceled (
@@ -191,15 +190,13 @@ def canceled_games_country(cur, conn):
     plt.tight_layout()
     plt.show()
 
-def average_canceled_games_per_month(cur, conn):
+def average_canceled_games_per_month(cur):
     """
     Calculates and visualizes the average number of canceled games per day for each month 
     from March to June 2020.
 
     Args:
         cur: The database cursor for executing SQL queries.
-        conn: The database connection.
-
     Returns:
         list: A list of average canceled games per day for each month.
     """

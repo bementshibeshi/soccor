@@ -107,7 +107,6 @@ def set_up_countryid_table(data, cur, conn):
         conn : Connection object to commit changes to the database.
     """
     cur.execute("PRAGMA foreign_keys = OFF;")
-    cur.execute("DROP TABLE IF EXISTS Countries")
     cur.execute("PRAGMA foreign_keys = ON;")
 
     cur.execute("CREATE TABLE IF NOT EXISTS Countries (id INTEGER PRIMARY KEY, country)")
@@ -127,7 +126,6 @@ def set_up_teams_table(data, cur, conn):
         cur: Cursor object to execute SQLite commands.
         conn: Connection object to commit changes to the database.
     """
-    cur.execute("DROP TABLE IF EXISTS Teams")
 
     cur.execute(
         """CREATE TABLE IF NOT EXISTS Teams (id INTEGER PRIMARY KEY, 

@@ -141,8 +141,6 @@ def insert_df_into_db(df, cur, conn):
 
     conn.execute("PRAGMA foreign_keys = OFF;")
 
-    cur.execute(f"DROP TABLE IF EXISTS Countries")
-
     conn.execute("PRAGMA foreign_keys = ON;")
 
     cur.execute(f'''
@@ -158,7 +156,6 @@ def insert_df_into_db(df, cur, conn):
 
     conn.commit()
 
-    cur.execute(f"DROP TABLE IF EXISTS Cases")
     cur.execute(f'''
         CREATE TABLE Cases (
             last_day_of_month TEXT,
