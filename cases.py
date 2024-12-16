@@ -139,22 +139,45 @@ def insert_df_into_db(df, cur, conn):
         conn: Connection object for the database.
     """
 
-    cur.execute(f"DROP TABLE IF EXISTS Cases")
+    conn.execute("PRAGMA foreign_keys = OFF;")
 
+    cur.execute(f"DROP TABLE IF EXISTS Countries")
+
+    conn.execute("PRAGMA foreign_keys = ON;")
+
+    cur.execute(f'''
+        CREATE TABLE Countries (
+            id INTEGER PRIMARY KEY,
+            country TEXT UNIQUE
+        )
+    ''')
+
+    unique_countries = df['country'].unique()
+    for country in unique_countries:
+        cur.execute(f"INSERT OR IGNORE INTO Countries (country) VALUES (?)", (country,))
+
+    conn.commit()
+
+    cur.execute(f"DROP TABLE IF EXISTS Cases")
     cur.execute(f'''
         CREATE TABLE Cases (
             last_day_of_month TEXT,
-            country TEXT,
-            code TEXT,
-            cases INTEGER
+            country_id INTEGER,
+            cases INTEGER,
+            FOREIGN KEY (country_id) REFERENCES Countries (id)
         )
     ''')
 
     for _, row in df.iterrows():
-        cur.execute(f'''
-            INSERT INTO Cases (last_day_of_month, country, code, cases)
-            VALUES (?, ?, ?, ?)
-        ''', (row['last_day_of_month'], row['country'], row['code'], row['cases']))
+        cur.execute(f"SELECT id FROM Countries WHERE country = ?", (row['country'],))
+        country_id = cur.fetchone()
+
+        if country_id:
+            country_id = country_id[0]
+            cur.execute(f'''
+                INSERT INTO Cases (last_day_of_month, country_id, cases)
+                VALUES (?, ?, ?)
+            ''', (row['last_day_of_month'], country_id, row['cases']))
 
     conn.commit()
 
