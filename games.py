@@ -255,7 +255,7 @@ def average_canceled_games_per_month(cur, conn):
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2, height + 0.05, f'{height:.2f}', ha='center', va='bottom', fontsize=10)
 
-    plt.title('Average Canceled Games Per Month (March - June)', fontsize=16)
+    plt.title('Average Canceled Games Per Day Per Month (March - June)', fontsize=16)
     plt.xlabel('Month', fontsize=12)
     plt.ylabel('Average Canceled Games', fontsize=12)
 
@@ -263,7 +263,7 @@ def average_canceled_games_per_month(cur, conn):
     plt.show()
 
     with open("average_canceled_games.txt", "w") as file:
-        file.write("Average Canceled Games Per Day (March - June)\n")
+        file.write("Average Canceled Games Per Day Per Month (March - June)\n")
         for i, avg in enumerate(avg_per_month):
             file.write(f"{month_names[i]}: {avg:.2f} canceled games per day\n")
 
