@@ -82,6 +82,7 @@ def teams_to_countries(country_names):
     # pprint.pprint(teams)
     return teams
 
+
 def set_up_database(db_name):
     """
     Sets up a SQLite database connection.

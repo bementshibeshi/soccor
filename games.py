@@ -6,32 +6,35 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def set_up_database(db_name):
+    """
+    Sets up a connection to an SQLite database and enables foreign key constraints.
+
+    Args:
+        db_name (str): The name of the SQLite database file to connect to.
+
+    Returns:
+        tuple: A cursor object for executing SQL queries and the connection object.
+    """
 
     path = os.path.dirname(os.path.abspath(__file__))
     conn = sqlite3.connect(os.path.join(path, db_name))
     conn.execute("PRAGMA foreign_keys = ON;")
     cur = conn.cursor()
     return cur, conn
-#31, 31, 30, 31
-#months (march,april,may,june) in the x axis and cases(number) in the y 
-
-#so go through all 31 days of march and count the number of games that are canceled (each canceled game is a row) 
-# and divide that by 31 to get the average for march and make a bar graph
-
-
-#so go through all 30 days of april and count the number of games that are canceled (each canceled game is a row) 
-# and divide that by 30 to get the average for april and make a bar graph
-
-#then go through all 31 days of may and count the number of games that are canceled (each canceled game is a row) 
-# and divide that by 31 to get the average for may and make a bar graph
-
-
-#last go through all 30 days of June and count the number of games that are canceled (each canceled game is a row) 
-# and divide that by 30 to get the average for june and make a bar graph
-
 
 
 def get_canceled_games(cur):
+    """
+    Fetches canceled football games from a remote API for dates between March 1, 2020, 
+    and June 1, 2020, and matches the games with teams in the database.
+
+    Args:
+        cur : The database cursor for executing SQL queries.
+
+    Returns:
+        list: A list of dictionaries containing canceled game information, 
+        each with keys 'date', 'team', and 'country_id'
+    """
 
     start_date = datetime(2020, 3, 1)
     end_date = datetime(2020, 6, 1)
@@ -114,8 +117,19 @@ def get_canceled_games(cur):
     # print(canceled_games)
     return canceled_games
 
-def insert_to_db(canceled_data, cur, conn):
 
+def insert_to_db(canceled_data, cur, conn):
+    """
+    Inserts canceled game data into the database.
+
+    Args:
+        canceled_data (list): A list of dictionaries containing canceled game information.
+        cur: The database cursor for executing SQL queries.
+        conn: The database connection for committing transactions.
+
+    Returns:
+        None
+    """
     cur.execute("""DROP TABLE IF EXISTS Games_Canceled""")
     
     cur.execute('''
@@ -137,6 +151,16 @@ def insert_to_db(canceled_data, cur, conn):
     conn.commit()
 
 def canceled_games_country(cur, conn):
+    """
+    Visualizes the number of canceled games per country.
+
+    Args:
+        cur: The database cursor for executing SQL queries.
+        conn: The database connection (closed after execution).
+
+    Returns:
+        None: Displays a bar chart of canceled games per country.
+    """
 
     query = '''
     SELECT Countries.country AS country, COUNT(Games_Canceled.country_id) AS canceled_count
@@ -168,6 +192,18 @@ def canceled_games_country(cur, conn):
     plt.show()
 
 def average_canceled_games_per_month(cur, conn):
+    """
+    Calculates and visualizes the average number of canceled games per day for each month 
+    from March to June 2020.
+
+    Args:
+        cur: The database cursor for executing SQL queries.
+        conn: The database connection.
+
+    Returns:
+        list: A list of average canceled games per day for each month.
+    """
+
     query = '''
     SELECT 
         date
@@ -219,7 +255,7 @@ def average_canceled_games_per_month(cur, conn):
         height = bar.get_height()
         plt.text(bar.get_x() + bar.get_width() / 2, height + 0.05, f'{height:.2f}', ha='center', va='bottom', fontsize=10)
 
-    plt.title('Average Canceled Games Per Day (March - June)', fontsize=16)
+    plt.title('Average Canceled Games Per Month (March - June)', fontsize=16)
     plt.xlabel('Month', fontsize=12)
     plt.ylabel('Average Canceled Games', fontsize=12)
 
@@ -235,6 +271,16 @@ def average_canceled_games_per_month(cur, conn):
   
 
 def canceled_games_team(cur, conn):
+    """
+    Visualizes the top 10 teams with the most canceled games.
+
+    Args:
+        cur: The database cursor for executing SQL queries.
+        conn: The database connection (closed after execution).
+
+    Returns:
+        None: Displays a bar chart of the top 10 teams with the most canceled games.
+    """
 
     query = '''
     SELECT Teams.name AS team, COUNT(Games_Canceled.team) AS canceled_count

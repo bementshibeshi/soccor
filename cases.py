@@ -28,6 +28,7 @@ def get_df():
 
     return df
 
+
 def set_up_database(db_name):
     """
     Sets up the SQLite database connection and enables foreign keys.
@@ -43,6 +44,7 @@ def set_up_database(db_name):
     conn.execute("PRAGMA foreign_keys = ON;")
     cur = conn.cursor()
     return cur, conn
+
 
 def update_country_codes(df, cur, conn):
     """
@@ -73,6 +75,7 @@ def update_country_codes(df, cur, conn):
     
     conn.commit()
 
+
 def get_matched_data(df, cur):
     """
     Filters the DataFrame to include only countries with matched codes in the database.
@@ -92,6 +95,7 @@ def get_matched_data(df, cur):
 
     # print(matched_df)
     return matched_df
+
 
 def get_month(matched_df):
     """
@@ -124,6 +128,7 @@ def get_month(matched_df):
 
     return df_last_day_of_month
 
+
 def insert_df_into_db(df, cur, conn):
     """
     Inserts a DataFrame into the 'Cases' table in the database.
@@ -153,8 +158,15 @@ def insert_df_into_db(df, cur, conn):
 
     conn.commit()
 
-
 def visualize_cases(df):
+    """
+    Visualizes COVID-19 case distribution among the top 10 countries with the most cases.
+
+    Args:
+        df : A DataFrame containing COVID-19 data. 
+    Returns:
+        Displays a pie chart visualizing the COVID-19 case distribution
+    """
     if not df.empty:
         df['last_day_of_month'] = pd.to_datetime(df['last_day_of_month'])
 
