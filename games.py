@@ -302,7 +302,7 @@ def canceled_games_team(cur, conn):
 
     for bar in bars:
         height = bar.get_height()
-        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.5, str(int(height)), ha='center', va='bottom', fontsize=10)
+        plt.text(bar.get_x() + bar.get_width() / 2, height , str(int(height)), ha='center', va='bottom', fontsize=10)
 
     plt.title('Top 10 Teams with the Most Canceled Games', fontsize=16)
     plt.xlabel('Teams', fontsize=12)
@@ -315,11 +315,11 @@ def canceled_games_team(cur, conn):
 
 def main():
     cur, conn = set_up_database("206_final.db")
-    #canceled_data = get_canceled_games(cur) #do not run api again unless you need the data
-    #insert_to_db(canceled_data, cur, conn)
-    #canceled_games_country(cur, conn)
+    # canceled_data = get_canceled_games(cur) #do not run api again unless you need the data
+    # insert_to_db(canceled_data, cur, conn)
+    # canceled_games_country(cur, conn)
     average_canceled_games_per_month(cur, conn)
-    #canceled_games_team(cur, conn)
+    canceled_games_team(cur, conn)
     conn.close()
 
 
